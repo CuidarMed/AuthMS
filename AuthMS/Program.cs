@@ -24,6 +24,7 @@ using Application.Interfaces.IRepositories;
 using Application.UseCase.NotificationServices;
 using Infrastructure.Repositories;
 using Infrastructure.Service.NotificationFormatter;
+using Application.UseCase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +68,7 @@ builder.Services.AddSingleton<IResetCodeGenerator, ResetCodeGenerator>();
 builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 builder.Services.AddHostedService<NotificationDispatcher>();
 // Formatters para CuidarMed+ (Telemedicina)
 builder.Services.AddSingleton<INotificationFormatter, AppointmentCreatedFormatter>();
