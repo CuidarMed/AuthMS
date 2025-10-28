@@ -11,6 +11,7 @@ namespace AuthMS.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserPostServices _userPostService;
@@ -59,7 +60,7 @@ namespace AuthMS.Controllers
         /// <param name="Id">The unique identifier of the user to be updated.</param>
         /// <param name="request">The updated details of the user.</param>
         /// <response code="200">Success</response>
-        [Authorize]
+        [Authorize(Policy = "CanEditOwnProfile")]
         [HttpPut("{Id}")]
         [ProducesResponseType(typeof(UserResponse), 200)]
         [ProducesResponseType(typeof(ApiError), 400)]
@@ -86,7 +87,7 @@ namespace AuthMS.Controllers
         /// </summary>
         /// <param name="Id"> The unique identifier of the user whose image is to be removed.</param>
         /// <response code="200">Success</response> 
-        [Authorize]
+        [Authorize(Policy = "CanEditOwnProfile")]
         [HttpPatch("RemoveImage/{Id}")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
         [ProducesResponseType(typeof(ApiError), 400)]
@@ -109,6 +110,7 @@ namespace AuthMS.Controllers
         /// </summary>
         /// <param name="id">ID único del usuario</param>
         /// <response code="200">Success</response>
+        [Authorize(Policy = "CanViewPatientInfo")]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserResponse), 200)]
         [ProducesResponseType(typeof(ApiError), 400)]
@@ -127,6 +129,48 @@ namespace AuthMS.Controllers
             catch (NotFoundException ex)
             {               
                 return NotFound(new ApiError { Message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene información básica de doctores (ejemplo de uso de políticas)
+        /// </summary>
+        /// <response code="200">Success</response>
+        [Authorize(Policy = "CanViewDoctorInfo")]
+        [HttpGet("doctors/info")]
+        [ProducesResponseType(typeof(GenericResponse), 200)]
+        [ProducesResponseType(typeof(ApiError), 401)]
+        public async Task<IActionResult> GetDoctorsInfo()
+        {
+            try
+            {
+                // Ejemplo de endpoint que requiere política específica
+                return Ok(new GenericResponse { Message = "Información de doctores obtenida exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiError { Message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene información del usuario autenticado (ejemplo de uso de claims)
+        /// </summary>
+        /// <response code="200">Success</response>
+        [Authorize(Policy = "ActiveUser")]
+        [HttpGet("me")]
+        [ProducesResponseType(typeof(GenericResponse), 200)]
+        [ProducesResponseType(typeof(ApiError), 401)]
+        public async Task<IActionResult> GetMyInfo()
+        {
+            try
+            {
+                // Ejemplo de endpoint que requiere usuario activo
+                return Ok(new GenericResponse { Message = "Información personal obtenida exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiError { Message = ex.Message });
             }
         }
     }

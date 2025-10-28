@@ -25,6 +25,7 @@ using Application.UseCase.NotificationServices;
 using Infrastructure.Repositories;
 using Infrastructure.Service.NotificationFormatter;
 using Application.UseCase;
+using Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,6 +119,50 @@ builder.Services.AddAuthentication(config =>
         ClockSkew = TimeSpan.Zero,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+});
+
+// Configurar políticas de autorización basadas en claims
+builder.Services.AddAuthorization(options =>
+{
+    // Política para editar perfil propio
+    options.AddPolicy("CanEditOwnProfile", policy =>
+        policy.RequireClaim(CustomClaims.CanEditOwnProfile, "true"));
+
+    // Política para ver información de doctores
+    options.AddPolicy("CanViewDoctorInfo", policy =>
+        policy.RequireClaim(CustomClaims.CanViewDoctorInfo, "true", "limited"));
+
+    // Política para ver información de pacientes
+    options.AddPolicy("CanViewPatientInfo", policy =>
+        policy.RequireClaim(CustomClaims.CanViewPatientInfo, "true"));
+
+    // Política para gestionar citas
+    options.AddPolicy("CanManageAppointments", policy =>
+        policy.RequireClaim(CustomClaims.CanManageAppointments, "true"));
+
+    // Política para gestionar agenda
+    options.AddPolicy("CanManageSchedule", policy =>
+        policy.RequireClaim(CustomClaims.CanManageSchedule, "true"));
+
+    // Política para ver citas propias
+    options.AddPolicy("CanViewOwnAppointments", policy =>
+        policy.RequireClaim(CustomClaims.CanViewOwnAppointments, "true"));
+
+    // Política para doctores únicamente
+    options.AddPolicy("DoctorOnly", policy =>
+        policy.RequireRole(UserRoles.Doctor));
+
+    // Política para pacientes únicamente
+    options.AddPolicy("PatientOnly", policy =>
+        policy.RequireRole(UserRoles.Patient));
+
+    // Política para usuarios con email verificado
+    options.AddPolicy("EmailVerified", policy =>
+        policy.RequireClaim(CustomClaims.IsEmailVerified, "true"));
+
+    // Política para usuarios activos
+    options.AddPolicy("ActiveUser", policy =>
+        policy.RequireClaim(CustomClaims.AccountStatus, "Active"));
 });
 
 //Obtener informacion del claim dentro del service

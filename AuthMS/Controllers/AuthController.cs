@@ -64,7 +64,7 @@ namespace AuthMS.Controllers
         /// </summary>
         /// <param name="request"> The request object containing the refresh token.</param>
         /// <response code="200">Success</response>
-        //[Authorize]
+        [Authorize]
         [HttpPost("Logout")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
         [ProducesResponseType(typeof(ApiError), 400)]
