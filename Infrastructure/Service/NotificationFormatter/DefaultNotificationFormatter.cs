@@ -13,11 +13,31 @@ namespace Infrastructure.Service.NotificationFormatter
         private readonly Dictionary<NotificationType, string> _templates
           = new()
         {
-      { NotificationType.PaymentSucceeded,  "Hemos recibido tu pago con éxito." },
-      { NotificationType.Reminder,          "Te recordamos que tienes una reserva próxima." },
-      { NotificationType.ReservationEndingSoon, "¡Atención! Tu reserva está por vencer en breve. Extiéndela ahora para evitar cargos adicionales." },
-      { NotificationType.Overdue,           "Has excedido el tiempo de tu reserva. Se aplicarán cargos adicionales." },
-              //...
+            // Turnos médicos
+            { NotificationType.AppointmentConfirmed, "Tu turno médico ha sido confirmado." },
+            { NotificationType.AppointmentCancelled, "Tu turno médico ha sido cancelado." },
+            { NotificationType.AppointmentRescheduled, "Tu turno médico ha sido reprogramado." },
+            { NotificationType.AppointmentStartingSoon, "Tu turno médico comenzará en breve." },
+            
+            // Consultas médicas
+            { NotificationType.ConsultationEnded, "Tu consulta médica ha finalizado." },
+            { NotificationType.ConsultationCancelled, "Tu consulta médica ha sido cancelada." },
+            
+            // Recetas y documentos
+            { NotificationType.MedicalOrderReady, "Tu orden médica está lista para descargar." },
+            { NotificationType.DocumentGenerated, "Tu documento médico está disponible." },
+            
+            // Recordatorios médicos
+            { NotificationType.FollowUpReminder, "Recordatorio: tienes una cita de seguimiento programada." },
+            { NotificationType.TestResultsReady, "Tus resultados de laboratorio están disponibles." },
+            
+            // Sistema general
+            { NotificationType.AccountActivated, "Tu cuenta ha sido activada exitosamente." },
+            { NotificationType.PasswordReset, "Tu contraseña ha sido restablecida." },
+            { NotificationType.EmailVerification, "Verifica tu dirección de email." },
+            
+            // Genéricos
+            { NotificationType.Custom, "Tienes una nueva notificación." }
         };
 
         public bool CanHandle(NotificationType type) => true; // capturamos TODO lo demás
@@ -28,7 +48,7 @@ namespace Infrastructure.Service.NotificationFormatter
             {
                 if (_templates.TryGetValue(n.Type, out var tpl))
                     return Task.FromResult(tpl);
-                return Task.FromResult("Tienes una nueva notificación de Rentify.");
+                return Task.FromResult("Tienes una nueva notificación.");
             }
 
             // si viene payload “custom”

@@ -35,29 +35,22 @@ namespace Application.UseCase.AuthServices
         public async Task SendPasswordResetEmail(string email, string resetCode)
         {
             await SendEmailAsync(email,
-                "Rentify | Restablecimiento de contraseña",
+                "Restablecimiento de contraseña",
                 $"Tu código de restablecimiento es: {resetCode}");
         }
 
         public async Task SendEmailVerification(string email, string verificationCode)
         {
             await SendEmailAsync(email,
-                "Rentify | Verificación de cuenta",
+                "Verificación de cuenta",
                 $"Tu código de verificación es: {verificationCode}");
         }
 
-        //public async Task SendCustomNotification(string email, string message)
-        //{
-        //    await SendEmailAsync(email,
-        //        "Rentify | Notificación",
-        //        message);
-        //}
-
-        public async Task SendCustomNotification(string email, string message)
+         public async Task SendCustomNotification(string email, string message)
         {            
             await SendEmailAsync(
                 to: email,
-                subject: "Rentify | Notificación",
+                subject: "Notificación",
                 body: message,
                 isHtml: true
             );
@@ -88,27 +81,6 @@ namespace Application.UseCase.AuthServices
             }
         }
 
-        //private async Task SendEmailAsync(string to, string subject, string body)
-        //{
-        //    using var smtp = new SmtpClient(_smtpServer, _smtpPort)
-        //    {
-        //        UseDefaultCredentials = false,
-        //        Credentials = new NetworkCredential(_senderEmail, _senderPassword),
-        //        EnableSsl = true,
-        //        DeliveryMethod = SmtpDeliveryMethod.Network
-        //    };
-
-        //    var mail = new MailMessage(_senderEmail, to, subject, body);
-        //    try
-        //    {
-        //        await smtp.SendMailAsync(mail);
-        //    }
-        //    catch (SmtpException ex)
-        //    {
-        //        // Logging opcional aquí
-        //        throw new Exception("Error al enviar el correo electrónico", ex);
-        //    }
-        //}
-
+        
     }
 }

@@ -68,13 +68,12 @@ builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>(
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<NotificationDispatcher>();
-builder.Services.AddSingleton<INotificationFormatter, ReservationCreatedFormatter>();
-builder.Services.AddSingleton<INotificationFormatter, ReservationUpdatedFormatter>();
-builder.Services.AddSingleton<INotificationFormatter, ReservationConfirmedFormatter>();
-builder.Services.AddSingleton<INotificationFormatter, ReservationCancelledFormatter>();
-builder.Services.AddSingleton<INotificationFormatter, ReservationPickedUpFormatter>();
-builder.Services.AddSingleton<INotificationFormatter, ReservationReturnedFormatter>();
-builder.Services.AddSingleton<INotificationFormatter, PaymentSucceededFormatter>();
+// Formatters para CuidarMed+ (Telemedicina)
+builder.Services.AddSingleton<INotificationFormatter, AppointmentCreatedFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentReminderFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, PrescriptionReadyFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, ConsultationStartedFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, MedicationReminderFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, DefaultNotificationFormatter>();
 
 
@@ -97,7 +96,7 @@ var jwtKey = builder.Configuration["JwtSettings:key"];
 
 if (string.IsNullOrEmpty(jwtKey))
 {
-    throw new Exception("No se encontró 'JwtSettings:key'. Configúralo en User Secrets o Variables de Entorno.");
+    throw new Exception("No se encontrï¿½ 'JwtSettings:key'. Configï¿½ralo en User Secrets o Variables de Entorno.");
 }
 
 builder.Services.AddAuthentication(config =>
@@ -141,10 +140,10 @@ var app = builder.Build();
 
 app.Use(async (context, next) =>
 {
-    // Continúa con la solicitud
+    // Continï¿½a con la solicitud
     await next();
 
-    // Si el estado de la respuesta es 401 (No autorizado), añade los encabezados CORS
+    // Si el estado de la respuesta es 401 (No autorizado), aï¿½ade los encabezados CORS
     if (context.Response.StatusCode == 401)
     {
         context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
