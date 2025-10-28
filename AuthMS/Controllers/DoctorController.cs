@@ -3,10 +3,12 @@ using Application.Dtos.Request;
 using Application.Dtos.Response;
 using Application.Exceptions;
 using Application.Interfaces.IServices;
+using Application.Interfaces.IQuery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using CustomAuthService = Application.Interfaces.IServices.IAuthorizationService;
 
 namespace AuthMS.Controllers
 {
@@ -15,13 +17,13 @@ namespace AuthMS.Controllers
     [RequireDoctor]
     public class DoctorController : ControllerBase
     {
-        private readonly IAuthorizationService _authorizationService;
-        private readonly IUserGetServices _userGetService;
+        private readonly CustomAuthService _authorizationService;
+        private readonly IUserQuery _userQuery;
 
-        public DoctorController(IAuthorizationService authorizationService, IUserGetServices userGetService)
+        public DoctorController(CustomAuthService authorizationService, IUserQuery userQuery)
         {
             _authorizationService = authorizationService;
-            _userGetService = userGetService;
+            _userQuery = userQuery;
         }
 
         /// <summary>
@@ -41,7 +43,7 @@ namespace AuthMS.Controllers
                     return Unauthorized(new ApiError { Message = "Usuario no autenticado" });
                 }
 
-                var result = await _userGetService.GetUserById(userId.Value);
+                var result = await _userQuery.GetUserById(userId.Value);
                 return new JsonResult(result) { StatusCode = 200 };
             }
             catch (NotFoundException ex)

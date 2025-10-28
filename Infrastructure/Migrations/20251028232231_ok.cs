@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class ok : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,6 +53,7 @@ namespace Infrastructure.Migrations
                     Dni = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
                     Password = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     ImageUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false),
+                    IsEmailVerified = table.Column<bool>(type: "bit", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     LockoutEndDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },

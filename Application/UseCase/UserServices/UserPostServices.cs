@@ -42,7 +42,7 @@ namespace Application.UseCase.UserServices
 
             var user = new User
             {
-                Role = UserRoles.User,
+                Role = UserRoles.Patient,
                 IsActive = false,
                 FirstName = request.FirstName,
                 LastName = request.LastName,

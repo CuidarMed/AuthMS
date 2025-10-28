@@ -33,10 +33,6 @@ namespace Application.Interfaces.IServices
         /// </summary>
         bool CanAccessUserData(int targetUserId);
 
-        /// <summary>
-        /// Verifica si el usuario actual es administrador
-        /// </summary>
-        bool IsAdmin();
 
         /// <summary>
         /// Verifica si el usuario actual es médico
