@@ -23,6 +23,8 @@ services:
       context: .
       dockerfile: AuthMS/Dockerfile
     container_name: authms_api
+    env_file:
+      - .env 
     environment:
       ConnectionStrings__DefaultConnection: "Server=sql,1433;Database=AuthMS;User Id=sa;Password=SecurePassword123!;Encrypt=True;TrustServerCertificate=True"
       ASPNETCORE_ENVIRONMENT: "Development"

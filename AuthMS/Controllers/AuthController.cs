@@ -2,15 +2,13 @@
 using Application.Dtos.Response;
 using Application.Exceptions;
 using Application.Interfaces.IServices.IAuthServices;
-using Application.UseCase.AuthServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthMS.Controllers
 {
-    [Route("api/v1/[controller]")]
     [ApiController]
+    [Route("api/v1/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IPasswordResetService _passwordResetService;
@@ -20,12 +18,11 @@ namespace AuthMS.Controllers
         private readonly IEmailVerificationService _emailVerificationService;
 
         public AuthController(
-            IPasswordResetService passwordResetService, 
-            ILoginService loginService, 
-            ILogoutService logoutService, 
-            IRefreshTokenService refreshTokenService, 
-            IEmailVerificationService emailVerificationService
-        )
+            IPasswordResetService passwordResetService,
+            ILoginService loginService,
+            ILogoutService logoutService,
+            IRefreshTokenService refreshTokenService,
+            IEmailVerificationService emailVerificationService)
         {
             _passwordResetService = passwordResetService;
             _loginService = loginService;
@@ -34,13 +31,9 @@ namespace AuthMS.Controllers
             _emailVerificationService = emailVerificationService;
         }
 
-
-
-        /// <summary>
-        /// Login the user with email and password.
-        /// </summary>
-        /// <param name="request"> The request object containing the email and password.</param>
-        /// <response code="200">Success</response>
+        // -------------------------------
+        // LOGIN
+        // -------------------------------
         [AllowAnonymous]
         [HttpPost("Login")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -50,7 +43,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _loginService.Login(request);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -58,12 +51,9 @@ namespace AuthMS.Controllers
             }
         }
 
-
-        /// <summary>
-        /// Logout the user by invalidating the refresh token.
-        /// </summary>
-        /// <param name="request"> The request object containing the refresh token.</param>
-        /// <response code="200">Success</response>
+        // -------------------------------
+        // LOGOUT
+        // -------------------------------
         [Authorize]
         [HttpPost("Logout")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -73,7 +63,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _logoutService.Logout(request);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -81,13 +71,9 @@ namespace AuthMS.Controllers
             }
         }
 
-
-
-        /// <summary>
-        /// Refresh the access token using the refresh token.
-        /// </summary>
-        /// <param name="request"> The request object containing the refresh token.</param>
-        /// <response code="200">Success</response>
+        // -------------------------------
+        // REFRESH TOKEN
+        // -------------------------------
         [AllowAnonymous]
         [HttpPost("RefreshToken")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -97,7 +83,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _refreshTokenService.RefreshAccessToken(request);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -105,12 +91,9 @@ namespace AuthMS.Controllers
             }
         }
 
-
-        /// <summary>
-        /// Change the password of the authenticated user.
-        /// </summary> 
-        /// <param name="request">The request object containing the current and new password.</param>
-        /// <response code="200">Success</response> 
+        // -------------------------------
+        // CHANGE PASSWORD
+        // -------------------------------
         [Authorize]
         [HttpPost("ChangePassword")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -120,7 +103,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _passwordResetService.ChangePassword(request);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -128,12 +111,9 @@ namespace AuthMS.Controllers
             }
         }
 
-
-        /// <summary>
-        /// Sends a password reset code to the specified email.
-        /// </summary> 
-        /// <param name="request"> The request object containing the email.</param>
-        /// <response code="200">Success</response>
+        // -------------------------------
+        // PASSWORD RESET - REQUEST
+        // -------------------------------
         [AllowAnonymous]
         [HttpPost("PasswordResetRequest")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -143,7 +123,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _passwordResetService.GenerateResetCode(request.Email);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -151,11 +131,9 @@ namespace AuthMS.Controllers
             }
         }
 
-        /// <summary>
-        /// Confirms the password reset by validating the provided reset code and updating the user's password.
-        /// </summary>
-        /// <param name="request"> The request object containing the email, reset code, and new password.</param>
-        /// <response code="200">Success</response>
+        // -------------------------------
+        // PASSWORD RESET - CONFIRM
+        // -------------------------------
         [AllowAnonymous]
         [HttpPost("PasswordResetConfirm")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -165,7 +143,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _passwordResetService.ValidateResetCode(request);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -173,12 +151,9 @@ namespace AuthMS.Controllers
             }
         }
 
-
-        /// <summary>
-        /// Verifies the account by validating the email verification code.
-        /// </summary>
-        /// <param name="request">The request object containing the email and verification code.</param>
-        /// <response code="200">Success</response>        
+        // -------------------------------
+        // VERIFY EMAIL
+        // -------------------------------
         [AllowAnonymous]
         [HttpPost("VerifyEmail")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -188,7 +163,7 @@ namespace AuthMS.Controllers
             try
             {
                 var result = await _emailVerificationService.ValidateVerificationCode(request);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -196,11 +171,9 @@ namespace AuthMS.Controllers
             }
         }
 
-        /// <summary>
-        /// Resends the email verification code.
-        /// </summary>
-        /// <param name="request">The request object containing the email.</param>
-        /// <response code="200">Success</response>
+        // -------------------------------
+        // RESEND VERIFICATION EMAIL
+        // -------------------------------
         [AllowAnonymous]
         [HttpPost("ResendVerificationEmail")]
         [ProducesResponseType(typeof(GenericResponse), 200)]
@@ -209,15 +182,13 @@ namespace AuthMS.Controllers
         {
             try
             {
-                // Suponiendo que tienes un método en el servicio de verificación para enviar el email
                 var result = await _emailVerificationService.SendVerificationEmail(request.Email);
-                return new JsonResult(result) { StatusCode = 200 };
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApiError { Message = ex.Message });
             }
         }
-
     }
 }
