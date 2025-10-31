@@ -169,6 +169,17 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddHttpContextAccessor();
 
+// HttpClient para comunicación con DirectoryMS
+builder.Services.AddHttpClient("DirectoryMS", client =>
+{
+    var baseUrl = builder.Configuration["DirectoryMS:BaseUrl"] ?? "http://localhost:5112";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+// Servicio para comunicación con DirectoryMS
+builder.Services.AddScoped<IDirectoryService, DirectoryService>();
+
 //CORS
 builder.Services.AddScoped<IUserQuery, UserQuery>();
 

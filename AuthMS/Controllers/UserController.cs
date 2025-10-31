@@ -6,6 +6,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace AuthMS.Controllers
 {
@@ -39,6 +40,19 @@ namespace AuthMS.Controllers
         [ProducesResponseType(typeof(ApiError), 400)]
         public async Task<IActionResult> RegisterUser(UserRequest request)
         {
+            // Si hay errores de validación de ModelState (de FluentValidationAutoValidation)
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .SelectMany(x => x.Value!.Errors)
+                    .Select(x => x.ErrorMessage)
+                    .ToList();
+                
+                var errorMessage = string.Join("; ", errors);
+                return BadRequest(new ApiError { Message = errorMessage });
+            }
+            
             try
             {
                 var result = await _userPostService.Register(request);

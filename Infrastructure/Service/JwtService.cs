@@ -25,7 +25,22 @@ namespace Infrastructure.Service
         public async Task<string> GenerateAccessToken(User user)
         {
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:key"]!));
+            var rawKey = _configuration["JwtSettings:key"] ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(rawKey))
+            {
+                throw new InvalidOperationException("JwtSettings:key no está configurado.");
+            }
+
+            var keyBytes = Encoding.UTF8.GetBytes(rawKey);
+
+            // HMAC-SHA256 necesita una llave de al menos 256 bits (32 bytes).
+            if (keyBytes.Length < 32)
+            {
+                keyBytes = SHA256.HashData(keyBytes);
+            }
+
+            var securityKey = new SymmetricSecurityKey(keyBytes);
 
             var signingCredentials = new SigningCredentials(
                 key: securityKey,

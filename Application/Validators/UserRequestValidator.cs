@@ -33,6 +33,13 @@ namespace Application.Validators
                 .MinimumLength(8).WithMessage("La contraseña debe tener al menos 8 caracteres.")
                 .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_]).+$")
                 .WithMessage("La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un dígito y un símbolo especial (@$!%*?&_).");
+
+            // El rol es opcional, pero si se proporciona debe ser válido
+            RuleFor(u => u.Role)
+                .Must(role => string.IsNullOrWhiteSpace(role) || role == "Patient" || role == "Doctor")
+                .WithMessage("El rol debe ser 'Patient' o 'Doctor' si se proporciona.");
+
+            // ImageUrl es opcional, no requiere validación
         }
     }
 }
