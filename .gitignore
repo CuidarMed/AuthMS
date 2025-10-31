@@ -38,9 +38,6 @@ publish/
 *.dll
 *.exe
 
-# Archivos locales de configuración o secretos
-.env
-appsettings.Development.json
 
 # SQL / Bases locales
 *.mdf

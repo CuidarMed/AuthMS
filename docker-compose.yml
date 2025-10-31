@@ -1,4 +1,23 @@
 services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    build:
+      context: .
+      dockerfile: Dockerfile.sql
+    container_name: authms_sql
+    environment:
+      SA_PASSWORD: "SecurePassword123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1435:1433"
+    networks:
+     - cuidarmed_net
+    healthcheck:
+      test: ["CMD", "sqlcmd", "-S", "localhost", "-U", "sa", "-P", "SecurePassword123!", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
   authms:
     build:
       context: .
@@ -7,10 +26,9 @@ services:
     env_file:
       - .env 
     environment:
-      ConnectionStrings__DefaultConnection: "Server=directory_sql,1433;Database=AuthMS;User Id=sa;Password=SecurePassword123!;Encrypt=True;TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=sql,1433;Database=AuthMS;User Id=sa;Password=SecurePassword123!;Encrypt=True;TrustServerCertificate=True"
       ASPNETCORE_ENVIRONMENT: "Development"
       ASPNETCORE_URLS: "http://+:8080"
-      DirectoryMS__BaseUrl: "http://directoryms:8080"
       JwtSettings__key: "${JWT_KEY}"
       JwtSettings__issuer: "${JWT_ISSUER}"
       JwtSettings__audience: "${JWT_AUDIENCE}"
@@ -19,6 +37,9 @@ services:
       EmailSettings__smtpPort: "${EMAIL_SMTP_PORT}"
       EmailSettings__SenderPassword: "${EMAIL_SENDER_PASSWORD}"
       EmailSettings__SenderEmail: "${EMAIL_SENDER_EMAIL}"
+    depends_on:
+      sql:
+        condition: service_healthy
     ports:
       - "8081:8080"
     networks:
