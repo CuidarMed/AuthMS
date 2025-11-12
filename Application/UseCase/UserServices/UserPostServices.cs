@@ -82,8 +82,10 @@ namespace Application.UseCase.UserServices
                 ImageUrl = imageUrl,
                 IsEmailVerified = true,
             };            
-
+            
+            _logger.LogInformation("Guardando usuario en base de datos AUTH. Email: {Email}, Role: {Role}", user.Email, user.Role);
             await _userCommand.Insert(user);
+            _logger.LogInformation("Usuario guardado exitosamente en base de datos AUTH. UserId: {UserId}, Email: {Email}", user.UserId, user.Email);
             
             // Si el usuario es un Patient, crear el registro en DirectoryMS
             if (user.Role == UserRoles.Patient)

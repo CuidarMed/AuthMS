@@ -92,7 +92,11 @@ builder.Services.AddScoped<IEmailVerificationQuery, EmailVerificationQuery>();
 
 //validators
 builder.Services.AddValidatorsFromAssembly(typeof(UserRequestValidator).Assembly);
-builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationAutoValidation(config =>
+{
+    // Configurar para que FluentValidation reemplace la validación automática de ASP.NET Core
+    config.DisableDataAnnotationsValidation = true;
+});
 
 //TokenConfiguration
 var jwtKey = builder.Configuration["JwtSettings:key"];
