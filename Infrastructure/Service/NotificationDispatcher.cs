@@ -6,6 +6,7 @@ using Application.Interfaces.IServices.IAuthServices;
 using Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,51 +22,72 @@ namespace Infrastructure.Service
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IEnumerable<INotificationFormatter> _formatters;
+        private readonly ILogger<NotificationDispatcher> _logger;
 
         public NotificationDispatcher(
             IServiceScopeFactory scopeFactory,
-            IEnumerable<INotificationFormatter> formatters)
+            IEnumerable<INotificationFormatter> formatters,
+            ILogger<NotificationDispatcher> logger)
         {
             _scopeFactory = scopeFactory;
             _formatters = formatters;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                using var scope = _scopeFactory.CreateScope();
-                var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
-                var userQuery = scope.ServiceProvider.GetRequiredService<IUserQuery>();
-                var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
-
-                var pendings = await repo.GetPending();
-                foreach (var n in pendings)
+                try
                 {
-                    try
+                    using var scope = _scopeFactory.CreateScope();
+                    var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+                    var userQuery = scope.ServiceProvider.GetRequiredService<IUserQuery>();
+                    var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+
+                    var pendings = await repo.GetPending();
+                    foreach (var n in pendings)
                     {
-                        var user = await userQuery.GetUserById(n.UserId);
-                        if (user == null) continue;
+                        try
+                        {
+                            var user = await userQuery.GetUserById(n.UserId);
+                            if (user == null) continue;
 
-                        // elijo el primer formatter que canHandle (o el genérico al final)
-                        var formatter = _formatters
-                            .First(f => f.CanHandle(n.Type));
+                            // elijo el primer formatter que canHandle (o el genérico al final)
+                            var formatter = _formatters
+                                .First(f => f.CanHandle(n.Type));
 
-                        var body = await formatter.FormatAsync(n, user);
+                            var body = await formatter.FormatAsync(n, user);
 
-                        await emailService.SendCustomNotification(user.Email, body);
+                            await emailService.SendCustomNotification(user.Email, body);
 
-                        n.Status = NotificationStatus.Sent;
-                        n.SentAt = DateTime.Now;
+                            n.Status = NotificationStatus.Sent;
+                            n.SentAt = DateTime.Now;
+                        }
+                        catch
+                        {
+                            n.Status = NotificationStatus.Failed;
+                        }
+                        await repo.Update(n);
                     }
-                    catch
-                    {
-                        n.Status = NotificationStatus.Failed;
-                    }
-                    await repo.Update(n);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error procesando notificaciones pendientes");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                }
+                catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
             }
         }
 

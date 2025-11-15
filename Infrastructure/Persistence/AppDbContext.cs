@@ -32,7 +32,11 @@ namespace Infrastructure.Persistence
                     .IsRequired();
 
                 entity.Property(u => u.IsActive)
-                    .IsRequired();
+                    .IsRequired()
+                    .HasDefaultValue(true);
+                entity.Property(u => u.IsEmailVerified)
+                    .IsRequired()
+                    .HasDefaultValue(true);
 
                 entity.Property(u => u.FirstName)
                     .HasMaxLength(255)
@@ -50,7 +54,7 @@ namespace Infrastructure.Persistence
                     .IsRequired();
 
                 entity.Property(u => u.Dni)
-                    .HasMaxLength(10)
+                    .HasMaxLength(20) // Aumentado para permitir DNI más largos
                     .HasColumnType("varchar")
                     .IsRequired();
 
@@ -60,8 +64,7 @@ namespace Infrastructure.Persistence
                     .IsRequired();
 
                 entity.Property(u => u.ImageUrl)
-                    .HasMaxLength(500)
-                    .HasColumnType("varchar")
+                    .HasColumnType("nvarchar(max)")
                     .IsRequired();
 
                 entity.Property(u => u.AccessFailedCount)

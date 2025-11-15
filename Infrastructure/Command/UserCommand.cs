@@ -21,7 +21,17 @@ namespace Infrastructure.Command
         public async Task Insert(User user)
         {
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            var saved = await _context.SaveChangesAsync();
+            if (saved == 0)
+            {
+                throw new Exception("No se pudo guardar el usuario en la base de datos. Ningún cambio fue persistido.");
+            }
+            // El UserId se asigna automáticamente después de SaveChangesAsync
+            // Verificar que se asignó correctamente
+            if (user.UserId <= 0)
+            {
+                throw new Exception($"Error: El UserId no se asignó correctamente después de guardar. UserId actual: {user.UserId}");
+            }
         }
 
         public async Task Update(User user)
