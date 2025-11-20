@@ -77,7 +77,9 @@ builder.Services.AddSingleton<INotificationFormatter, AppointmentReminderFormatt
 builder.Services.AddSingleton<INotificationFormatter, PrescriptionReadyFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, ConsultationStartedFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, MedicationReminderFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentCreatedDoctorFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, DefaultNotificationFormatter>();
+
 
 
 //CQRS
@@ -181,7 +183,6 @@ builder.Services.AddHttpClient("DirectoryMS", client =>
 builder.Services.AddScoped<IDirectoryService, DirectoryService>();
 
 //CORS
-builder.Services.AddScoped<IUserQuery, UserQuery>();
 
 builder.Services.AddCors(options =>
 {

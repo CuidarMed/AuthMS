@@ -15,7 +15,10 @@ namespace Domain.Entities
         AppointmentRescheduled,
         AppointmentReminder,
         AppointmentStartingSoon,
-        
+
+        // Notificación al doctor
+        AppointmentCreatedDoctor,
+
         // Consultas médicas
         ConsultationStarted,
         ConsultationEnded,
