@@ -5,8 +5,6 @@ using Application.Exceptions;
 using Application.Interfaces.IServices;
 using Application.Interfaces.IServices.IAuthServices;
 using Application.Interfaces.IQuery;
-using Application.Interfaces.IServices.IUserServices;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +20,11 @@ namespace AuthMS.Controllers
     {
         private readonly CustomAuthService _authorizationService;
         private readonly IUserQuery _userQuery;
-        private readonly IUserPutServices _userPutService;
 
-        public PatientController(CustomAuthService authorizationService, IUserQuery userQuery, IUserPutServices userPutService)
+        public PatientController(CustomAuthService authorizationService, IUserQuery userQuery)
         {
             _authorizationService = authorizationService;
             _userQuery = userQuery;
-            _userPutService = userPutService;
         }
 
         /// <summary>
@@ -80,20 +76,10 @@ namespace AuthMS.Controllers
                     return Unauthorized(new ApiError { Message = "Usuario no autenticado" });
                 }
 
-                // Validar que el usuario esté intentando actualizar su propio perfil
-                // (ya está garantizado por RequirePatient, pero por seguridad adicional)
-                
-                // Actualizar el usuario usando el servicio
-                var result = await _userPutService.UpdateUser(userId.Value, request);
+                // Los pacientes solo pueden actualizar ciertos campos
+                // (implementar lógica específica según necesidades)
+                var result = await _userQuery.GetUserById(userId.Value);
                 return new JsonResult(result) { StatusCode = 200 };
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new ApiError { Message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new ApiError { Message = ex.Message });
             }
             catch (Exception ex)
             {

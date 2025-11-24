@@ -64,7 +64,8 @@ namespace Infrastructure.Persistence
                     .IsRequired();
 
                 entity.Property(u => u.ImageUrl)
-                    .HasColumnType("nvarchar(max)")
+                    .HasMaxLength(500)
+                    .HasColumnType("varchar")
                     .IsRequired();
 
                 entity.Property(u => u.AccessFailedCount)

@@ -41,24 +41,7 @@ namespace Application.UseCase.UserServices
             user.LastName = request.LastName;
             user.Email = request.Email;
             user.Dni = request.Dni;
-            
-            // Validar y procesar ImageUrl (aceptar URLs normales o data URLs)
-            var imageUrl = string.IsNullOrWhiteSpace(request.ImageUrl)
-                ? user.ImageUrl // Mantener la imagen actual si no se proporciona una nueva
-                : request.ImageUrl.Trim();
-            
-            // Validar tamaño máximo de data URLs (2MB de imagen comprimida ≈ ~2.7MB en base64)
-            if (imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
-            {
-                // Limitar data URLs a aproximadamente 3MB (para imágenes comprimidas)
-                const int maxDataUrlLength = 3 * 1024 * 1024; // 3MB
-                if (imageUrl.Length > maxDataUrlLength)
-                {
-                    throw new InvalidValueException("La imagen es demasiado grande. Por favor, comprime la imagen o usa una URL externa.");
-                }
-            }
-            
-            user.ImageUrl = imageUrl;
+            user.ImageUrl = request.ImageUrl;
 
             await _userCommand.Update(user);
 

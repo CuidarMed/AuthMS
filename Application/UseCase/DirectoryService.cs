@@ -78,8 +78,7 @@ namespace Application.UseCase
                     FirstName = firstName,
                     LastName = lastName,
                     LicenseNumber = "PENDING", // Valor por defecto, se puede actualizar después
-                    Biography = (string)null, // Se puede actualizar después
-                    Specialty = "Clinico" // Valor por defecto, el usuario puede actualizarlo después
+                    Biography = (string)null // Se puede actualizar después
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("/api/v1/Doctor", createDoctorRequest);

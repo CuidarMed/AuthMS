@@ -9,7 +9,6 @@ using Infrastructure.Command;
 using Infrastructure.Persistence;
 using Infrastructure.Query;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Application.Interfaces.IServices.ICryptographyService;
@@ -51,11 +50,7 @@ builder.Services.AddSwaggerGen(options =>
 // Custom            
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseSqlServer(connectionString)
-        .ConfigureWarnings(warnings => 
-            warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
-);
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 // Services
 builder.Services.AddScoped<IUserPostServices, UserPostServices>();
@@ -99,11 +94,7 @@ builder.Services.AddScoped<IEmailVerificationQuery, EmailVerificationQuery>();
 
 //validators
 builder.Services.AddValidatorsFromAssembly(typeof(UserRequestValidator).Assembly);
-builder.Services.AddFluentValidationAutoValidation(config =>
-{
-    // Configurar para que FluentValidation reemplace la validación automática de ASP.NET Core
-    config.DisableDataAnnotationsValidation = true;
-});
+builder.Services.AddFluentValidationAutoValidation();
 
 //TokenConfiguration
 var jwtKey = builder.Configuration["JwtSettings:key"];
@@ -207,19 +198,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    try
-    {
-        logger.LogInformation("Applying database migrations...");
-        dbContext.Database.Migrate();
-        logger.LogInformation("Database migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error applying database migrations. The application will continue but the database may not be up to date.");
-        // No lanzar la excepción para que la aplicación pueda iniciar
-        // La migración se puede aplicar manualmente después
-    }
+    dbContext.Database.Migrate();
 }
 
 app.Use(async (context, next) =>

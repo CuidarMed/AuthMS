@@ -165,7 +165,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()

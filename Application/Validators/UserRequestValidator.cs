@@ -39,11 +39,7 @@ namespace Application.Validators
                 .Must(role => string.IsNullOrWhiteSpace(role) || role == "Patient" || role == "Doctor")
                 .WithMessage("El rol debe ser 'Patient' o 'Doctor' si se proporciona.");
 
-            // ImageUrl es opcional - permitir null, string vacío o cualquier valor
-            RuleFor(u => u.ImageUrl)
-                .Must(imageUrl => imageUrl == null || !string.IsNullOrWhiteSpace(imageUrl))
-                .WithMessage("Si se proporciona ImageUrl, no puede estar vacío.")
-                .When(u => u.ImageUrl != null); // Solo validar si se proporciona
+            // ImageUrl es opcional, no requiere validación
         }
     }
 }
