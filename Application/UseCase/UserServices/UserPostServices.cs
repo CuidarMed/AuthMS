@@ -64,10 +64,15 @@ namespace Application.UseCase.UserServices
                 ? defaultImageUrl
                 : request.ImageUrl.Trim();
 
-            // Evitar guardar datos base64 o cadenas muy largas (columna varchar(500))
-            if (imageUrl.Length > 500 || imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            // Validar tamaño máximo de data URLs (2MB de imagen comprimida ≈ ~2.7MB en base64)
+            if (imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
             {
-                imageUrl = defaultImageUrl;
+                // Limitar data URLs a aproximadamente 3MB (para imágenes comprimidas)
+                const int maxDataUrlLength = 3 * 1024 * 1024; // 3MB
+                if (imageUrl.Length > maxDataUrlLength)
+                {
+                    imageUrl = defaultImageUrl;
+                }
             }
 
             var user = new User
@@ -82,8 +87,10 @@ namespace Application.UseCase.UserServices
                 ImageUrl = imageUrl,
                 IsEmailVerified = true,
             };            
-
+            
+            _logger.LogInformation("Guardando usuario en base de datos AUTH. Email: {Email}, Role: {Role}", user.Email, user.Role);
             await _userCommand.Insert(user);
+            _logger.LogInformation("Usuario guardado exitosamente en base de datos AUTH. UserId: {UserId}, Email: {Email}", user.UserId, user.Email);
             
             // Si el usuario es un Patient, crear el registro en DirectoryMS
             if (user.Role == UserRoles.Patient)

@@ -26,6 +26,12 @@ namespace Infrastructure.Command
             {
                 throw new Exception("No se pudo guardar el usuario en la base de datos. Ningún cambio fue persistido.");
             }
+            // El UserId se asigna automáticamente después de SaveChangesAsync
+            // Verificar que se asignó correctamente
+            if (user.UserId <= 0)
+            {
+                throw new Exception($"Error: El UserId no se asignó correctamente después de guardar. UserId actual: {user.UserId}");
+            }
         }
 
         public async Task Update(User user)

@@ -4,6 +4,8 @@ using Application.Dtos.Response;
 using Application.Exceptions;
 using Application.Interfaces.IServices;
 using Application.Interfaces.IQuery;
+using Application.Interfaces.IServices.IUserServices;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,11 +21,13 @@ namespace AuthMS.Controllers
     {
         private readonly CustomAuthService _authorizationService;
         private readonly IUserQuery _userQuery;
+        private readonly IUserPutServices _userPutService;
 
-        public DoctorController(CustomAuthService authorizationService, IUserQuery userQuery)
+        public DoctorController(CustomAuthService authorizationService, IUserQuery userQuery, IUserPutServices userPutService)
         {
             _authorizationService = authorizationService;
             _userQuery = userQuery;
+            _userPutService = userPutService;
         }
 
         /// <summary>
@@ -45,6 +49,46 @@ namespace AuthMS.Controllers
 
                 var result = await _userQuery.GetUserById(userId.Value);
                 return new JsonResult(result) { StatusCode = 200 };
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ApiError { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiError { Message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el perfil del médico autenticado
+        /// </summary>
+        /// <param name="request">Datos actualizados del médico</param>
+        /// <response code="200">Success</response>
+        [HttpPut("profile")]
+        [ProducesResponseType(typeof(UserResponse), 200)]
+        [ProducesResponseType(typeof(ApiError), 400)]
+        [ProducesResponseType(typeof(ApiError), 401)]
+        public async Task<IActionResult> UpdateMyProfile(UserUpdateRequest request)
+        {
+            try
+            {
+                var userId = _authorizationService.GetCurrentUserId();
+                if (userId == null)
+                {
+                    return Unauthorized(new ApiError { Message = "Usuario no autenticado" });
+                }
+
+                // Validar que el usuario esté intentando actualizar su propio perfil
+                // (ya está garantizado por RequireDoctor, pero por seguridad adicional)
+                
+                // Actualizar el usuario usando el servicio
+                var result = await _userPutService.UpdateUser(userId.Value, request);
+                return new JsonResult(result) { StatusCode = 200 };
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new ApiError { Message = ex.Message });
             }
             catch (NotFoundException ex)
             {
