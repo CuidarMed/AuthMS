@@ -16,6 +16,18 @@ namespace Domain.Events
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Dni { get; set; }
+        public string Phone { get; set; }
+
+        // Datos de Patient
+        public DateOnly? DateOfBirth { get; set; }
+        public string? Address { get; set; }
+        public string? HealthPlan { get; set; }
+        public string? MembershipNumber { get; set; }
+
+        // Datos de Doctor
+        public string? LicenseNumber { get; set; }
+        public string? Biography { get; set; }
+        public string? Specialty { get; set; }
 
     }
 }

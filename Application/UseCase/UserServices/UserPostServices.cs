@@ -92,17 +92,22 @@ namespace Application.UseCase.UserServices
                 new UserCreatedEvent
                 {
                     UserId = user.UserId,
-                    Role = user.Role,
+                    Role = request.Role,
                     IsActive = user.IsActive,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,
                     Dni = user.Dni,
-                    Password = user.Password,
-                    ImageUrl = imageUrl,
-                    IsEmailVerified = user.IsEmailVerified,
-                    AccessFailedCount = user.AccessFailedCount,
-                    LockoutEndDate = user.LockoutEndDate
+
+                    Phone = request.Phone,
+                    DateOfBirth = request.DateOfBirth,
+                    Address = request.Address,
+                    HealthPlan = request.HealthPlan,
+                    MembershipNumber = request.MembershipNumber,
+
+                    LicenseNumber = request.LicenseNumber,
+                    Biography = request.Biography,
+                    Specialty = request.Specialty
                 },
                 routingKey: "user.created"
             );
