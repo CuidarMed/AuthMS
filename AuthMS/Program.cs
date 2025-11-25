@@ -27,6 +27,8 @@ using Infrastructure.Repositories;
 using Infrastructure.Service.NotificationFormatter;
 using Application.UseCase;
 using Domain.Entities;
+using Application.Interfaces.Messaging;
+using Infrastructure.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,7 +76,6 @@ builder.Services.AddSingleton<IResetCodeGenerator, ResetCodeGenerator>();
 builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 builder.Services.AddHostedService<NotificationDispatcher>();
 // Formatters para CuidarMed+ (Telemedicina)
 builder.Services.AddSingleton<INotificationFormatter, AppointmentCreatedFormatter>();
@@ -94,6 +95,10 @@ builder.Services.AddScoped<IPasswordResetCommand, PasswordResetCommand>();
 builder.Services.AddScoped<IPasswordResetQuery, PasswordResetQuery>();
 builder.Services.AddScoped<IEmailVerificationCommand, EmailVerificationCommand>();
 builder.Services.AddScoped<IEmailVerificationQuery, EmailVerificationQuery>();
+
+
+//Messaging
+builder.Services.AddSingleton<IEventBus, RabbitMqEventBus>();
 
 //validators
 builder.Services.AddValidatorsFromAssembly(typeof(UserRequestValidator).Assembly);
@@ -178,16 +183,8 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-// HttpClient para comunicación con DirectoryMS
-builder.Services.AddHttpClient("DirectoryMS", client =>
-{
-    var baseUrl = builder.Configuration["DirectoryMS:BaseUrl"] ?? "http://localhost:5112";
-    client.BaseAddress = new Uri(baseUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);
-});
 
-// Servicio para comunicación con DirectoryMS
-builder.Services.AddScoped<IDirectoryService, DirectoryService>();
+
 
 //CORS
 builder.Services.AddScoped<IUserQuery, UserQuery>();

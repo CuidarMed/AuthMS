@@ -3,16 +3,13 @@ using Application.Dtos.Response;
 using Application.Exceptions;
 using Application.Interfaces.ICommand;
 using Application.Interfaces.IQuery;
-using Application.Interfaces.IServices;
 using Application.Interfaces.IServices.ICryptographyService;
 using Application.Interfaces.IServices.IUserServices;
+using Application.Interfaces.Messaging;
 using Domain.Entities;
+using Domain.Events;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Application.UseCase.UserServices
 {
@@ -20,23 +17,23 @@ namespace Application.UseCase.UserServices
     {
         private readonly IUserQuery _userQuery;
         private readonly IUserCommand _userCommand;
-        private readonly ICryptographyService _cryptographyService;
-        private readonly IDirectoryService _directoryService;
+        private readonly ICryptographyService _cryptographyService;      
         private readonly ILogger<UserPostServices> _logger;
+        private readonly IEventBus _eventBus;
 
         public UserPostServices(
             IUserQuery userQuery, 
             IUserCommand userCommand, 
             ICryptographyService cryptographyService, 
-            IDirectoryService directoryService,
-            ILogger<UserPostServices> logger
+            ILogger<UserPostServices> logger,
+            IEventBus eventBus
         )
         {
             _userQuery = userQuery;
             _userCommand = userCommand;
             _cryptographyService = cryptographyService;
-            _directoryService = directoryService;
             _logger = logger;
+            _eventBus = eventBus;
         }
 
         public async Task<UserResponse> Register(UserRequest request)
@@ -90,36 +87,29 @@ namespace Application.UseCase.UserServices
             
             _logger.LogInformation("Guardando usuario en base de datos AUTH. Email: {Email}, Role: {Role}", user.Email, user.Role);
             await _userCommand.Insert(user);
+
+            await _eventBus.PublishAsync(
+                new UserCreatedEvent
+                {
+                    UserId = user.UserId,
+                    Role = user.Role,
+                    IsActive = user.IsActive,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Dni = user.Dni,
+                    Password = user.Password,
+                    ImageUrl = imageUrl,
+                    IsEmailVerified = user.IsEmailVerified,
+                    AccessFailedCount = user.AccessFailedCount,
+                    LockoutEndDate = user.LockoutEndDate
+                },
+                routingKey: "user.created"
+            );
+
             _logger.LogInformation("Usuario guardado exitosamente en base de datos AUTH. UserId: {UserId}, Email: {Email}", user.UserId, user.Email);
             
-            // Si el usuario es un Patient, crear el registro en DirectoryMS
-            if (user.Role == UserRoles.Patient)
-            {
-                _logger.LogInformation("Intentando crear paciente en DirectoryMS para UserId: {UserId}", user.UserId);
-                var patientCreated = await _directoryService.CreatePatientAsync(user.UserId, user.FirstName, user.LastName, user.Dni);
-                if (patientCreated)
-                {
-                    _logger.LogInformation("Paciente creado exitosamente en DirectoryMS para UserId: {UserId}", user.UserId);
-                }
-                else
-                {
-                    _logger.LogWarning("No se pudo crear el paciente en DirectoryMS para UserId: {UserId}. El usuario se creó exitosamente en AuthMS.", user.UserId);
-                }
-            }
-            // Si el usuario es un Doctor, crear el registro en DirectoryMS
-            else if (user.Role == UserRoles.Doctor)
-            {
-                _logger.LogInformation("Intentando crear doctor en DirectoryMS para UserId: {UserId}", user.UserId);
-                var doctorCreated = await _directoryService.CreateDoctorAsync(user.UserId, user.FirstName, user.LastName);
-                if (doctorCreated)
-                {
-                    _logger.LogInformation("Doctor creado exitosamente en DirectoryMS para UserId: {UserId}", user.UserId);
-                }
-                else
-                {
-                    _logger.LogWarning("No se pudo crear el doctor en DirectoryMS para UserId: {UserId}. El usuario se creó exitosamente en AuthMS.", user.UserId);
-                }
-            }
+            
             return new UserResponse
             {
                 UserId = user.UserId,
