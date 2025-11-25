@@ -28,14 +28,23 @@ namespace Application.UseCase.NotificationServices
             _userQuery = userQuery;
             _emailService = emailService;
         }
-        
+
 
         public async Task EnqueueEvent(NotificationEventRequest request)
         {
-            if (!Enum.TryParse<NotificationType>(request.EventType, out var type))
-                throw new InvalidOperationException($"Tipo de evento '{request.EventType}' inválido.");
+            Console.WriteLine("📥 [DEBUG] NotificationEventRequest recibido:");
+            Console.WriteLine($"     UserId: {request.UserId}");
+            Console.WriteLine($"     EventType RAW: '{request.EventType}'");
+            Console.WriteLine($"     Payload: {JsonSerializer.Serialize(request.Payload)}");
 
-            // 1) Persisto notificación
+            if (!Enum.TryParse<NotificationType>(request.EventType, out var type))
+            {
+                Console.WriteLine("❌ [ERROR] NO se pudo convertir EventType → NotificationType");
+                throw new InvalidOperationException($"Tipo de evento '{request.EventType}' inválido.");
+            }
+
+            Console.WriteLine($"✔ [DEBUG] Enum parseado correctamente → {type}");
+
             var notif = new Notification
             {
                 NotificationId = Guid.NewGuid(),
@@ -45,8 +54,11 @@ namespace Application.UseCase.NotificationServices
                 CreatedAt = DateTime.Now,
                 Payload = JsonSerializer.Serialize(request.Payload)
             };
+
+            Console.WriteLine("📝 [DEBUG] Notificación persistida con Type: " + notif.Type);
+
             await _repo.Add(notif);
-            
         }
+
     }
 }

@@ -70,6 +70,7 @@ builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>(
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+
 builder.Services.AddHostedService<NotificationDispatcher>();
 // Formatters para CuidarMed+ (Telemedicina)
 builder.Services.AddSingleton<INotificationFormatter, AppointmentCreatedFormatter>();
@@ -78,7 +79,16 @@ builder.Services.AddSingleton<INotificationFormatter, PrescriptionReadyFormatter
 builder.Services.AddSingleton<INotificationFormatter, ConsultationStartedFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, MedicationReminderFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, AppointmentCreatedDoctorFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentCancelledByPatientFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentCancelledByPatientDoctorFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentCancelledByDoctorFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentCancelledByDoctorDoctorFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentConfirmedFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentConfirmedDoctorFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentRescheduledFormatter>();
+builder.Services.AddSingleton<INotificationFormatter, AppointmentRescheduledDoctorFormatter>();
 builder.Services.AddSingleton<INotificationFormatter, DefaultNotificationFormatter>();
+
 
 
 

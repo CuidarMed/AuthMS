@@ -88,7 +88,22 @@ namespace Infrastructure.Service
                             // 2) Obtener formatter
                             _logger.LogInformation(" Buscando formatter para Type={Type}", n.Type);
 
-                            var formatter = _formatters.FirstOrDefault(f => f.CanHandle(n.Type));
+                            _logger.LogInformation("DEBUG: Formatters registrados:");
+                            foreach (var f in _formatters)
+                            {
+                                _logger.LogInformation("  - {FormatterName}", f.GetType().Name);
+                            }
+
+                            _logger.LogInformation("DEBUG: Buscando formatter para Type={Type}", n.Type);
+
+                            var formatter = _formatters.FirstOrDefault(f =>
+                            {
+                                bool can = f.CanHandle(n.Type);
+                                _logger.LogInformation("   → {Formatter} CanHandle({Type}) = {Can}",
+                                    f.GetType().Name, n.Type, can);
+                                return can;
+                            });
+
                             if (formatter == null)
                             {
                                 _logger.LogError(" ERROR: No existe formatter para el tipo {Type}. Marcando Failed", n.Type);
@@ -142,8 +157,8 @@ namespace Infrastructure.Service
 
                 try
                 {
-                    _logger.LogInformation("Esperando 60 segundos antes del próximo ciclo...");
-                    await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
+                    _logger.LogInformation("Esperando 10 segundos antes del próximo ciclo...");
+                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                 }
                 catch (TaskCanceledException)
                 {
