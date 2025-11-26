@@ -19,21 +19,21 @@ namespace Application.UseCase.UserServices
         private readonly IUserCommand _userCommand;
         private readonly ICryptographyService _cryptographyService;      
         private readonly ILogger<UserPostServices> _logger;
-        private readonly IEventBus _eventBus;
+        private readonly IUserCreatedEventPublisher _userCreatedEventPublisher;
 
         public UserPostServices(
             IUserQuery userQuery, 
             IUserCommand userCommand, 
             ICryptographyService cryptographyService, 
             ILogger<UserPostServices> logger,
-            IEventBus eventBus
+            IUserCreatedEventPublisher userCreatedEventPublisher
         )
         {
             _userQuery = userQuery;
             _userCommand = userCommand;
             _cryptographyService = cryptographyService;
             _logger = logger;
-            _eventBus = eventBus;
+            _userCreatedEventPublisher = userCreatedEventPublisher;
         }
 
         public async Task<UserResponse> Register(UserRequest request)
@@ -88,29 +88,26 @@ namespace Application.UseCase.UserServices
             _logger.LogInformation("Guardando usuario en base de datos AUTH. Email: {Email}, Role: {Role}", user.Email, user.Role);
             await _userCommand.Insert(user);
 
-            await _eventBus.PublishAsync(
-                new UserCreatedEvent
-                {
-                    UserId = user.UserId,
-                    Role = request.Role,
-                    IsActive = user.IsActive,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    Dni = user.Dni,
+            var evt = new UserCreatedEvent
+            {
+                UserId = user.UserId,
+                Role = user.Role,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Dni = user.Dni,
 
-                    Phone = request.Phone,
-                    DateOfBirth = request.DateOfBirth,
-                    Address = request.Address,
-                    HealthPlan = request.HealthPlan,
-                    MembershipNumber = request.MembershipNumber,
+                DateOfBirth = request.DateOfBirth,
+                Adress = request.Adress,
+                HealthPlan = request.HealthPlan,
+                MembershipNumber = request.MembershipNumber,
+                LicenseNumber = request.LicenseNumber,
+                Phone = request.Phone,
+                Biography = request.Biography,
+                Specialty = request.Specialty
+            };
 
-                    LicenseNumber = request.LicenseNumber,
-                    Biography = request.Biography,
-                    Specialty = request.Specialty
-                },
-                routingKey: "user.created"
-            );
+            //publicar evento en rabbitmq
+            await _userCreatedEventPublisher.PublishAsync(evt);
 
             _logger.LogInformation("Usuario guardado exitosamente en base de datos AUTH. UserId: {UserId}, Email: {Email}", user.UserId, user.Email);
             

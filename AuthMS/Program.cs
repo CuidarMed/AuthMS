@@ -99,6 +99,7 @@ builder.Services.AddScoped<IEmailVerificationQuery, EmailVerificationQuery>();
 
 //Messaging
 builder.Services.AddSingleton<IEventBus, RabbitMqEventBus>();
+builder.Services.AddSingleton<IUserCreatedEventPublisher, RabbitMqUserCreatedEventPublisher>();
 
 //validators
 builder.Services.AddValidatorsFromAssembly(typeof(UserRequestValidator).Assembly);
