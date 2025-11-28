@@ -6,13 +6,14 @@ services:
     container_name: authms_api
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      ConnectionStrings__DefaultConnection: 'Server=sql_server,1433;Database=AUTH;User Id=sa;Password=SecurePassword123!;Encrypt=False;TrustServerCertificate=True;'
+      ConnectionStrings__DefaultConnection: 'Server=db33326.public.databaseasp.net,1433;Database=db33326;User Id=db33326;Password=6Aw@Rk-92Ko=;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True;'
 
       DirectoryMS__BaseUrl: "http://host.docker.internal:8081"
-      JwtSettings__key: ${JWT_KEY:-dev-super-secret-key-change-me}
-      JwtSettings__issuer: ${JWT_ISSUER:-CuidarMed}
-      JwtSettings__audience: ${JWT_AUDIENCE:-CuidarMed}
-      JwtSettings__expiresInMinutes: ${JWT_EXPIRES_IN_MINUTES:-60}
+      # Clave JWT hardcodeada (44 caracteres = 352 bits, suficiente para HMAC-SHA256)
+      JwtSettings__key: "SuperLargaClaveDeJwtParaCuidarMed+123456789"
+      JwtSettings__issuer: "CuidarMed"
+      JwtSettings__audience: "CuidarMed"
+      JwtSettings__TokenExpirationMinutes: "60"
       EmailSettings__SmtpServer: ${EMAIL_SMTP_SERVER:-smtp.gmail.com}
       EmailSettings__SmtpPort: ${EMAIL_SMTP_PORT:-587}
       EmailSettings__SenderEmail: ${EMAIL_SENDER_EMAIL:-noreply@cuidarmed.com}

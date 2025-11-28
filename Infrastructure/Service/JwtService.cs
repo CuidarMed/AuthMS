@@ -32,14 +32,9 @@ namespace Infrastructure.Service
                 throw new InvalidOperationException("JwtSettings:key no está configurado.");
             }
 
+            // Usar la misma lógica que Program.cs para validación
+            // NO hashear la clave, usar directamente los bytes UTF-8
             var keyBytes = Encoding.UTF8.GetBytes(rawKey);
-
-            // HMAC-SHA256 necesita una llave de al menos 256 bits (32 bytes).
-            if (keyBytes.Length < 32)
-            {
-                keyBytes = SHA256.HashData(keyBytes);
-            }
-
             var securityKey = new SymmetricSecurityKey(keyBytes);
 
             var signingCredentials = new SigningCredentials(
@@ -53,6 +48,8 @@ namespace Infrastructure.Service
             claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()));
             claims.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()));
             claims.AddClaim(new Claim(ClaimTypes.Role, user.Role));
+            claims.AddClaim(new Claim("role", user.Role)); // Claim adicional en minúsculas para compatibilidad
+            claims.AddClaim(new Claim("Role", user.Role)); // Claim adicional con mayúscula
             claims.AddClaim(new Claim("IsActive", user.IsActive.ToString()));
             claims.AddClaim(new Claim("UserId", user.UserId.ToString()));
             claims.AddClaim(new Claim("FirstName", user.FirstName.ToString()));
@@ -128,6 +125,15 @@ namespace Infrastructure.Service
                 
                 // Los pacientes pueden ver información básica de doctores para reservar turnos
                 claims.AddClaim(new Claim(CustomClaims.CanViewDoctorInfo, "limited"));
+            }
+
+            // Permisos específicos para Administradores
+            if (user.Role == UserRoles.Admin)
+            {
+                claims.AddClaim(new Claim(CustomClaims.CanViewDoctorInfo, "true"));
+                claims.AddClaim(new Claim(CustomClaims.CanViewPatientInfo, "true"));
+                claims.AddClaim(new Claim(CustomClaims.CanManageAppointments, "true"));
+                claims.AddClaim(new Claim(CustomClaims.CanManageSchedule, "true"));
             }
         }
         

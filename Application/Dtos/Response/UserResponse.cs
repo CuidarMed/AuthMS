@@ -1,9 +1,5 @@
 ﻿using Domain.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Dtos.Response
 {
@@ -16,6 +12,10 @@ namespace Application.Dtos.Response
         public string Dni { get; set; }
         public string ImageUrl { get; set; }
         public string Role { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsEmailVerified { get; set; }
+        public int AccessFailedCount { get; set; }
+        public DateTime? LockoutEndDate { get; set; }
 
 
 
@@ -29,7 +29,11 @@ namespace Application.Dtos.Response
                 Email = user.Email,
                 Dni = user.Dni,
                 ImageUrl = user.ImageUrl,
-                Role = user.Role
+                Role = user.Role,
+                IsActive = user.IsActive,
+                IsEmailVerified = user.IsEmailVerified,
+                AccessFailedCount = user.AccessFailedCount,
+                LockoutEndDate = user.LockoutEndDate
             };
         }
     }

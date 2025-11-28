@@ -1,4 +1,5 @@
 ﻿using Application.Dtos.Request;
+using Domain.Entities;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -36,8 +37,12 @@ namespace Application.Validators
 
             // El rol es opcional, pero si se proporciona debe ser válido
             RuleFor(u => u.Role)
-                .Must(role => string.IsNullOrWhiteSpace(role) || role == "Patient" || role == "Doctor")
-                .WithMessage("El rol debe ser 'Patient' o 'Doctor' si se proporciona.");
+                .Must(role =>
+                    string.IsNullOrWhiteSpace(role) ||
+                    role == UserRoles.Patient ||
+                    role == UserRoles.Doctor ||
+                    role == UserRoles.Admin)
+                .WithMessage($"El rol debe ser '{UserRoles.Patient}', '{UserRoles.Doctor}' o '{UserRoles.Admin}' si se proporciona.");
 
             // ImageUrl es opcional, no requiere validación
         }

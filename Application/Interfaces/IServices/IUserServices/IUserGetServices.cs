@@ -10,5 +10,6 @@ namespace Application.Interfaces.IServices.IUserServices
     public interface IUserGetServices
     {
         Task<UserResponse> GetUserById(int id);
+        Task<IEnumerable<UserResponse>> GetUsers(string role = null, string search = null);
     }
 }

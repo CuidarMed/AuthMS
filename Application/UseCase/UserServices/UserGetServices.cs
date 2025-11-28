@@ -2,10 +2,8 @@
 using Application.Exceptions;
 using Application.Interfaces.IQuery;
 using Application.Interfaces.IServices.IUserServices;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.UseCase.UserServices
@@ -28,6 +26,14 @@ namespace Application.UseCase.UserServices
                 throw new NotFoundException("No se encontró el usuario");
 
             return (UserResponse)user;
+        }
+
+        public async Task<IEnumerable<UserResponse>> GetUsers(string role = null, string search = null)
+        {
+            var normalizedRole = string.IsNullOrWhiteSpace(role) ? null : role.Trim();
+            var users = await _userQuery.GetUsersAsync(normalizedRole, search);
+
+            return users.Select(user => (UserResponse)user).ToList();
         }
     }
 }

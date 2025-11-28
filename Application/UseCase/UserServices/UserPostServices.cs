@@ -50,9 +50,9 @@ namespace Application.UseCase.UserServices
                 : request.Role.Trim(); // Limpiar espacios en blanco
 
             // Validar que el rol sea válido (comparación case-sensitive)
-            if (role != UserRoles.Patient && role != UserRoles.Doctor)
+            if (role != UserRoles.Patient && role != UserRoles.Doctor && role != UserRoles.Admin)
             {
-                throw new InvalidValueException($"El rol '{role}' no es válido. Los roles permitidos son: '{UserRoles.Patient}' o '{UserRoles.Doctor}'");
+                throw new InvalidValueException($"El rol '{role}' no es válido. Los roles permitidos son: '{UserRoles.Patient}', '{UserRoles.Doctor}' o '{UserRoles.Admin}'");
             }
             
             _logger.LogInformation("Registrando usuario con rol: {Role}", role);

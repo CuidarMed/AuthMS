@@ -12,5 +12,6 @@ namespace Application.Interfaces.IQuery
         Task<User> GetUserById(int id);
         Task<User> GetUserByEmail(string email);
         Task<bool> ExistEmail(string email);
+        Task<IEnumerable<User>> GetUsersAsync(string role = null, string search = null);
     }
 }

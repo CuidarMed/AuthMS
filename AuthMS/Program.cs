@@ -8,6 +8,7 @@ using FluentValidation;
 using Infrastructure.Command;
 using Infrastructure.Persistence;
 using Infrastructure.Query;
+using Infrastructure.Persistence.Seeders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -26,6 +27,7 @@ using Infrastructure.Repositories;
 using Infrastructure.Service.NotificationFormatter;
 using Application.UseCase;
 using Domain.Entities;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +93,7 @@ builder.Services.AddScoped<IPasswordResetCommand, PasswordResetCommand>();
 builder.Services.AddScoped<IPasswordResetQuery, PasswordResetQuery>();
 builder.Services.AddScoped<IEmailVerificationCommand, EmailVerificationCommand>();
 builder.Services.AddScoped<IEmailVerificationQuery, EmailVerificationQuery>();
+builder.Services.AddTransient<DefaultAdminSeeder>();
 
 //validators
 builder.Services.AddValidatorsFromAssembly(typeof(UserRequestValidator).Assembly);
@@ -119,7 +122,9 @@ builder.Services.AddAuthentication(config =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)), // Misma lógica que JwtService: sin hash, directamente UTF-8
+        RoleClaimType = ClaimTypes.Role,
+        NameClaimType = ClaimTypes.NameIdentifier
     };
 });
 
@@ -157,6 +162,14 @@ builder.Services.AddAuthorization(options =>
     // Política para pacientes únicamente
     options.AddPolicy("PatientOnly", policy =>
         policy.RequireRole(UserRoles.Patient));
+
+    // Política para administradores únicamente
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole(UserRoles.Admin) ||
+            context.User.HasClaim(CustomClaims.UserRole, UserRoles.Admin) ||
+            context.User.HasClaim("role", UserRoles.Admin) ||
+            context.User.HasClaim("Role", UserRoles.Admin)));
 
     // Política para usuarios con email verificado
     options.AddPolicy("EmailVerified", policy =>
@@ -198,7 +211,10 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+    await dbContext.Database.MigrateAsync();
+
+    var adminSeeder = scope.ServiceProvider.GetRequiredService<DefaultAdminSeeder>();
+    await adminSeeder.SeedAsync();
 }
 
 app.Use(async (context, next) =>
