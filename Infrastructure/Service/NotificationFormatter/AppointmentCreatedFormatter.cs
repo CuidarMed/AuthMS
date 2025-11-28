@@ -128,10 +128,6 @@ namespace Infrastructure.Service.NotificationFormatter
                         <p>{dto.Notes}</p>
                       </div>" : "")}
 
-                  <div style='background-color: #d4edda; padding: 15px; border-radius: 8px; margin: 20px 0;'>
-                    <p style='margin: 0; color: #155724;'><strong>💡 Recordatorio:</strong> Recibirás un recordatorio 24 horas antes de tu turno.</p>
-                  </div>
-
                   <p>¡Gracias por confiar en <strong>CuidarMed+</strong> para tu salud!</p>
                   
                   <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>

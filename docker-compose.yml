@@ -15,9 +15,13 @@ services:
       JwtSettings__expiresInMinutes: ${JWT_EXPIRES_IN_MINUTES:-60}
       EmailSettings__SmtpServer: ${EMAIL_SMTP_SERVER:-smtp.gmail.com}
       EmailSettings__SmtpPort: ${EMAIL_SMTP_PORT:-587}
-      EmailSettings__SenderEmail: ${EMAIL_SENDER_EMAIL:-noreply@cuidarmed.com}
-      EmailSettings__SenderPassword: ${EMAIL_SENDER_PASSWORD:-dev-password}
-      EmailSettings__EnableEmails: true
+      EmailSettings__SenderEmail: ${EMAIL_SENDER_EMAIL:-cuidarmed.notificaciones@gmail.com}
+      EmailSettings__SenderPassword: ${EMAIL_SENDER_PASSWORD:-kkuj rrpx tyxm ycad}
+      EmailSettings__EnableEmails: "true"
+
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__User: "user"
+      RabbitMQ__Pass: "pass"
     ports:
       - "8082:8080"
     networks:
