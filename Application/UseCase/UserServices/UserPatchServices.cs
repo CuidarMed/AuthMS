@@ -31,8 +31,6 @@ namespace Application.UseCase.UserServices
                 throw new NotFoundException("No se encontró ningún usuario con el ID " + Id);
             }
 
-            user.ImageUrl = "https://icons.veryicon.com/png/o/internet--web/prejudice/user-128.png";
-
             await _userCommand.Update(user);
 
             return new GenericResponse { Message = "¡Tu foto de perfil ha sido eliminada exitosamente!" };

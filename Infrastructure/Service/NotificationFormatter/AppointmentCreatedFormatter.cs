@@ -107,7 +107,7 @@ namespace Infrastructure.Service.NotificationFormatter
                     <p><strong>📍 Tipo:</strong> {dto.AppointmentType}</p>
                   </div>
 
-                  {(dto.AppointmentType == "Virtual" && !string.IsNullOrEmpty(dto.MeetingLink) ? 
+                  {(dto.AppointmentType == "Virtual" && !string.IsNullOrEmpty(dto.MeetingLink) ?
                     $@"<div style='background-color: #e8f4fd; padding: 15px; border-radius: 8px; margin: 20px 0;'>
                         <h3 style='color: #2c5aa0; margin-top: 0;'>💻 Consulta Virtual</h3>
                         <p>🔗 <strong>Enlace de la videollamada:</strong></p>
@@ -115,22 +115,18 @@ namespace Infrastructure.Service.NotificationFormatter
                         <p><em>Te recomendamos ingresar 5 minutos antes del horario programado.</em></p>
                       </div>" : "")}
 
-                  {(dto.AppointmentType == "Presencial" ? 
+                  {(dto.AppointmentType == "Presencial" ?
                     $@"<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;'>
                         <h3 style='color: #856404; margin-top: 0;'>🏥 Consulta Presencial</h3>
                         <p>📍 <strong>Ubicación:</strong> Consultorio médico</p>
                         <p><em>Te recomendamos llegar 10 minutos antes del horario programado.</em></p>
                       </div>" : "")}
 
-                  {(!string.IsNullOrEmpty(dto.Notes) ? 
+                  {(!string.IsNullOrEmpty(dto.Notes) ?
                     $@"<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;'>
                         <h3 style='color: #2c5aa0; margin-top: 0;'>📝 Notas Adicionales</h3>
                         <p>{dto.Notes}</p>
                       </div>" : "")}
-
-                  <div style='background-color: #d4edda; padding: 15px; border-radius: 8px; margin: 20px 0;'>
-                    <p style='margin: 0; color: #155724;'><strong>💡 Recordatorio:</strong> Recibirás un recordatorio 24 horas antes de tu turno.</p>
-                  </div>
 
                   <p>¡Gracias por confiar en <strong>CuidarMed+</strong> para tu salud!</p>
                   

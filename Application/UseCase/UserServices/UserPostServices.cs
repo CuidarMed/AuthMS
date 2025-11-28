@@ -53,25 +53,6 @@ namespace Application.UseCase.UserServices
             }
             
             _logger.LogInformation("Registrando usuario con rol: {Role}", role);
-
-            const string defaultImageUrl = "https://icons.veryicon.com/png/o/internet--web/prejudice/user-128.png";
-
-            // Usar ImageUrl del request si está disponible, de lo contrario usar valor por defecto
-            var imageUrl = string.IsNullOrWhiteSpace(request.ImageUrl)
-                ? defaultImageUrl
-                : request.ImageUrl.Trim();
-
-            // Validar tamaño máximo de data URLs (2MB de imagen comprimida ≈ ~2.7MB en base64)
-            if (imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
-            {
-                // Limitar data URLs a aproximadamente 3MB (para imágenes comprimidas)
-                const int maxDataUrlLength = 3 * 1024 * 1024; // 3MB
-                if (imageUrl.Length > maxDataUrlLength)
-                {
-                    imageUrl = defaultImageUrl;
-                }
-            }
-
             var user = new User
             {
                 Role = role,
@@ -81,7 +62,6 @@ namespace Application.UseCase.UserServices
                 Email = request.Email,
                 Dni = request.Dni,
                 Password = hashedPassword,
-                ImageUrl = imageUrl,
                 IsEmailVerified = true,
             };            
             
@@ -119,7 +99,6 @@ namespace Application.UseCase.UserServices
                 LastName = user.LastName,
                 Email = user.Email,
                 Dni = user.Dni,
-                ImageUrl = user.ImageUrl,
                 Role = user.Role
             };           
         }

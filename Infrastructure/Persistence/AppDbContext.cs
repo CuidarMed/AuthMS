@@ -63,10 +63,6 @@ namespace Infrastructure.Persistence
                     .HasColumnType("varchar")
                     .IsRequired();
 
-                entity.Property(u => u.ImageUrl)
-                    .HasColumnType("nvarchar(max)")
-                    .IsRequired();
-
                 entity.Property(u => u.AccessFailedCount)
                     .IsRequired()
                     .HasDefaultValue(0);

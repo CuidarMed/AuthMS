@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Dtos.Request
+﻿namespace Application.Dtos.Request
 {
     public class UserUpdateRequest
     {
@@ -12,7 +6,6 @@ namespace Application.Dtos.Request
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Dni { get; set; }
-        public string ImageUrl { get; set; }
 
     }
 }
