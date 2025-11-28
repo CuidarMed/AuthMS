@@ -1,6 +1,7 @@
 using Application.Dtos.Notification;
 using Application.Interfaces.IServices;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,18 +10,82 @@ namespace Infrastructure.Service.NotificationFormatter
 {
     public class AppointmentCreatedFormatter : INotificationFormatter
     {
+        private readonly ILogger<AppointmentCreatedFormatter> _logger;
+
         private static readonly JsonSerializerOptions _opts = new()
         {
             PropertyNameCaseInsensitive = true
         };
+
+        public AppointmentCreatedFormatter(ILogger<AppointmentCreatedFormatter> logger)
+        {
+            _logger = logger;
+        }
 
         public bool CanHandle(NotificationType type) =>
             type == NotificationType.AppointmentCreated;
 
         public Task<string> FormatAsync(Notification n, User user)
         {
+            _logger.LogInformation("Deserializando payload de AppointmentCreated...");
+
             var dto = JsonSerializer.Deserialize<AppointmentPayload>(n.Payload!, _opts)
                       ?? throw new InvalidOperationException("Payload inválido");
+
+            _logger.LogInformation("Payload deserializado correctamente.");
+
+            // ===========================================
+            // 🕒 MANEJO SEGURO Y UNIVERSAL DEL HORARIO
+            // ===========================================
+
+            string appointmentTimeFormatted = "Horario no disponible";
+
+            try
+            {
+                object rawTime = dto.AppointmentTime; // puede ser string, TimeSpan o null
+
+                if (rawTime == null)
+                {
+                    _logger.LogWarning("AppointmentTime vino NULL.");
+                }
+                else
+                {
+                    // Si es TimeSpan
+                    if (rawTime is TimeSpan ts)
+                    {
+                        appointmentTimeFormatted = ts.ToString(@"hh\:mm");
+                        _logger.LogInformation("AppointmentTime detectado como TimeSpan: {0}", appointmentTimeFormatted);
+                    }
+                    // Si es string
+                    else if (rawTime is string str)
+                    {
+                        if (TimeSpan.TryParse(str, out var parsed))
+                        {
+                            appointmentTimeFormatted = parsed.ToString(@"hh\:mm");
+                            _logger.LogInformation("AppointmentTime detectado como string válido: {0}", appointmentTimeFormatted);
+                        }
+                        else
+                        {
+                            appointmentTimeFormatted = str; // fallback seguro
+                            _logger.LogWarning("AppointmentTime string no es TimeSpan válido. Se usa literal: {0}", str);
+                        }
+                    }
+                    else
+                    {
+                        appointmentTimeFormatted = rawTime.ToString();
+                        _logger.LogWarning("AppointmentTime tipo desconocido. Se usa ToString(): {0}", appointmentTimeFormatted);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error formateando AppointmentTime. Se utilizará 'Horario no disponible'.");
+            }
+
+
+            // ==========
+            // HTML FINAL
+            // ==========
 
             var html = $@"
             <html>
@@ -38,7 +103,7 @@ namespace Infrastructure.Service.NotificationFormatter
                     <p><strong>👨‍⚕️ Médico:</strong> {dto.DoctorName}</p>
                     <p><strong>🏥 Especialidad:</strong> {dto.Specialty}</p>
                     <p><strong>📅 Fecha:</strong> {dto.AppointmentDate:dd/MM/yyyy}</p>
-                    <p><strong>🕐 Hora:</strong> {dto.AppointmentTime:hh\\:mm} hs</p>
+                    <p><strong>🕐 Hora:</strong> {appointmentTimeFormatted} hs</p>
                     <p><strong>📍 Tipo:</strong> {dto.AppointmentType}</p>
                   </div>
 

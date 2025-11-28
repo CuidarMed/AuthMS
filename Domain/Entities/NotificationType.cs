@@ -11,11 +11,23 @@ namespace Domain.Entities
         // Turnos médicos
         AppointmentCreated,
         AppointmentConfirmed,
+        AppointmentConfirmedDoctor,
         AppointmentCancelled,
         AppointmentRescheduled,
         AppointmentReminder,
         AppointmentStartingSoon,
-        
+
+        AppointmentRescheduledDoctor,
+
+        // Notificación al doctor
+        AppointmentCreatedDoctor,
+
+
+        AppointmentCancelledByPatient,
+        AppointmentCancelledByPatientDoctor,
+        AppointmentCancelledByDoctor,
+        AppointmentCancelledByDoctorDoctor,
+
         // Consultas médicas
         ConsultationStarted,
         ConsultationEnded,
