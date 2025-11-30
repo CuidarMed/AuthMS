@@ -6,6 +6,7 @@ using Application.Interfaces.IQuery;
 using Application.Interfaces.IServices;
 using Application.Interfaces.IServices.IAuthServices;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace Application.UseCase.AuthServices
         private readonly IEmailVerificationCommand _emailVerificationCommand;
         private readonly IEmailService _emailService;
         private readonly IResetCodeGenerator _resetCodeGenerator;
+        private readonly ILogger<EmailVerificationService> _logger;
 
         public EmailVerificationService(
             IUserQuery userQuery,
@@ -29,7 +31,8 @@ namespace Application.UseCase.AuthServices
             IEmailVerificationQuery emailVerificationQuery,
             IEmailVerificationCommand emailVerificationCommand,
             IEmailService emailService,
-            IResetCodeGenerator resetCodeGenerator
+            IResetCodeGenerator resetCodeGenerator,
+            ILogger<EmailVerificationService> logger
         )
         {
             _userQuery = userQuery;
@@ -38,14 +41,29 @@ namespace Application.UseCase.AuthServices
             _emailVerificationCommand = emailVerificationCommand;
             _emailService = emailService;
             _resetCodeGenerator = resetCodeGenerator;
+            _logger = logger;
         }
 
         public async Task<GenericResponse> ValidateVerificationCode(EmailVerificationRequest request)
         {
+            _logger.LogInformation("Validando código de verificación para email: {Email}, código: {Code}", request.Email, request.VerificationCode);
+            
             // Buscar el token de verificación por email y código (la comparación debe ser case-sensitive)
             var token = await _emailVerificationQuery.GetByEmailAndCode(request.Email, request.VerificationCode);
-            if (token == null || token.Expiration < DateTime.Now)
+            
+            if (token == null)
             {
+                _logger.LogWarning("Token no encontrado para email: {Email}, código: {Code}", request.Email, request.VerificationCode);
+                throw new BadRequestException("El código no es válido o ha expirado.");
+            }
+
+            var now = DateTime.UtcNow;
+            _logger.LogInformation("Token encontrado. Expiración: {Expiration}, Ahora (UTC): {Now}, Diferencia: {Diff} minutos", 
+                token.Expiration, now, (token.Expiration - now).TotalMinutes);
+
+            if (token.Expiration < now)
+            {
+                _logger.LogWarning("Token expirado. Expiración: {Expiration}, Ahora: {Now}", token.Expiration, now);
                 throw new BadRequestException("El código no es válido o ha expirado.");
             }
 
@@ -56,8 +74,8 @@ namespace Application.UseCase.AuthServices
                 throw new NotFoundException("El usuario no existe.");
             }
 
-            // Activar la cuenta
-            user.IsActive = true;
+            // Verificar el email de la cuenta
+            user.IsEmailVerified = true;
             await _userCommand.Update(user);
 
             // Eliminar el token de verificación tras su uso
@@ -79,12 +97,15 @@ namespace Application.UseCase.AuthServices
             int lengthCode = 6;
             string verificationCode = _resetCodeGenerator.GenerateResetCode(lengthCode);
 
+            var expirationTime = DateTime.UtcNow.AddMinutes(15);
+            _logger.LogInformation("Generando código de verificación para {Email}. Código: {Code}, Expira: {Expiration}", 
+                email, verificationCode, expirationTime);
             
             var token = new EmailVerificationToken
             {
                 Email = email,
                 Token = verificationCode,
-                Expiration = DateTime.Now.AddMinutes(15)
+                Expiration = expirationTime
             };
 
             await _emailVerificationCommand.Insert(token);

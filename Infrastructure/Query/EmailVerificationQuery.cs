@@ -21,14 +21,20 @@ namespace Infrastructure.Query
 
         public async Task<EmailVerificationToken> GetByEmailAndCode(string email, string verificationCode)
         {
-            return await _context.EmailVerificationTokens.FirstOrDefaultAsync(
-                t => t.Email == email && EF.Functions.Collate(t.Token, "Latin1_General_CS_AS") == verificationCode);
+            // Obtener todos los tokens para el email y comparar case-insensitive en memoria
+            var tokens = await _context.EmailVerificationTokens
+                .Where(t => t.Email == email)
+                .ToListAsync();
+            
+            // Comparación case-insensitive
+            return tokens.FirstOrDefault(t => 
+                string.Equals(t.Token, verificationCode, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<IEnumerable<EmailVerificationToken>> GetExpiredTokensByEmail(string email)
         {
             return await _context.EmailVerificationTokens
-                                 .Where(t => t.Email == email && t.Expiration < DateTime.Now)
+                                 .Where(t => t.Email == email && t.Expiration < DateTime.UtcNow)
                                  .ToListAsync();
         }
     }

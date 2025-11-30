@@ -104,7 +104,7 @@ namespace Infrastructure.Service.NotificationFormatter
                     <p><strong>🏥 Especialidad:</strong> {dto.Specialty}</p>
                     <p><strong>📅 Fecha:</strong> {dto.AppointmentDate:dd/MM/yyyy}</p>
                     <p><strong>🕐 Hora:</strong> {appointmentTimeFormatted} hs</p>
-                    <p><strong>📍 Tipo:</strong> {dto.AppointmentType}</p>
+                    <p><strong>📍 Tipo:</strong> {(dto.AppointmentType == "Presencial" ? "Teleconsulta" : dto.AppointmentType)}</p>
                   </div>
 
                   {(dto.AppointmentType == "Virtual" && !string.IsNullOrEmpty(dto.MeetingLink) ?

@@ -56,6 +56,11 @@ namespace Application.UseCase.AuthServices
                 throw new InactiveUserException("La cuenta de usuario está inactiva.");
             }
 
+            if (!user.IsEmailVerified)
+            {
+                throw new InvalidValueException("Debes confirmar tu cuenta mediante el código enviado a tu correo electrónico antes de poder iniciar sesión.");
+            }
+
             if (user.LockoutEndDate.HasValue && user.LockoutEndDate.Value > now)
             {
                 var minutesLeft = Math.Ceiling((user.LockoutEndDate.Value - now).TotalMinutes);

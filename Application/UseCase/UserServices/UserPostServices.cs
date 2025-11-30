@@ -5,6 +5,7 @@ using Application.Interfaces.ICommand;
 using Application.Interfaces.IQuery;
 using Application.Interfaces.IServices.ICryptographyService;
 using Application.Interfaces.IServices.IUserServices;
+using Application.Interfaces.IServices.IAuthServices;
 using Application.Interfaces.Messaging;
 using Domain.Entities;
 using Domain.Events;
@@ -20,13 +21,15 @@ namespace Application.UseCase.UserServices
         private readonly ICryptographyService _cryptographyService;      
         private readonly ILogger<UserPostServices> _logger;
         private readonly IUserCreatedEventPublisher _userCreatedEventPublisher;
+        private readonly IEmailVerificationService _emailVerificationService;
 
         public UserPostServices(
             IUserQuery userQuery, 
             IUserCommand userCommand, 
             ICryptographyService cryptographyService, 
             ILogger<UserPostServices> logger,
-            IUserCreatedEventPublisher userCreatedEventPublisher
+            IUserCreatedEventPublisher userCreatedEventPublisher,
+            IEmailVerificationService emailVerificationService
         )
         {
             _userQuery = userQuery;
@@ -34,6 +37,7 @@ namespace Application.UseCase.UserServices
             _cryptographyService = cryptographyService;
             _logger = logger;
             _userCreatedEventPublisher = userCreatedEventPublisher;
+            _emailVerificationService = emailVerificationService;
         }
 
         public async Task<UserResponse> Register(UserRequest request)
@@ -62,11 +66,15 @@ namespace Application.UseCase.UserServices
                 Email = request.Email,
                 Dni = request.Dni,
                 Password = hashedPassword,
-                IsEmailVerified = true,
+                IsEmailVerified = false, // La cuenta no está verificada hasta que se confirme el código
             };            
             
             _logger.LogInformation("Guardando usuario en base de datos AUTH. Email: {Email}, Role: {Role}", user.Email, user.Role);
             await _userCommand.Insert(user);
+
+            // Enviar código de confirmación por email
+            _logger.LogInformation("Enviando código de confirmación a {Email}", user.Email);
+            await _emailVerificationService.SendVerificationEmail(user.Email);
 
             var evt = new UserCreatedEvent
             {

@@ -36,7 +36,7 @@ namespace Infrastructure.Persistence
                     .HasDefaultValue(true);
                 entity.Property(u => u.IsEmailVerified)
                     .IsRequired()
-                    .HasDefaultValue(true);
+                    .HasDefaultValue(false);
 
                 entity.Property(u => u.FirstName)
                     .HasMaxLength(255)
