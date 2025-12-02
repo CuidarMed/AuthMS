@@ -56,3 +56,4 @@ UpgradeLog*.htm
 *.dbmdl
 *.dbproj.schemaview
 *.log
+*.env
